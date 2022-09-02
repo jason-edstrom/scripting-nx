@@ -107,6 +107,7 @@ jobs:
         with:
           node-version: 16
           cache: 'yarn'
+      - run: npm install -g nx
       - run: yarn install
       - run: nx run ${{ matrix.project }}:${{ matrix.target}}
 
@@ -125,6 +126,7 @@ jobs:
         with:
           node-version: 16
           cache: 'yarn'
+      - run: npm install -g nx
       - run: yarn install
       - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
 
@@ -144,5 +146,6 @@ jobs:
         with:
           node-version: 16
           cache: 'yarn'
+      - run: npm install -g nx
       - run: yarn install
       - run: nx run ${{ matrix.project }}:build-android
