@@ -78,7 +78,7 @@ jobs:
 
 
   json_execute:
-    name: BUILD the things
+    name: BUILD the json
     needs: [matrix]
     runs-on: ubuntu-latest
     strategy:
@@ -96,7 +96,7 @@ jobs:
       - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
 
   json_apps_execute:
-    name: BUILD the things
+    name: BUILD the json apps
     needs: [ matrix ]
     runs-on: ubuntu-latest
     strategy:
@@ -114,7 +114,7 @@ jobs:
       - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
 
   array_execute:
-    name: BUILD the apps
+    name: BUILD the array apps
     needs: [ matrix ]
     runs-on: ubuntu-latest
     strategy:
