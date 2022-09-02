@@ -45,7 +45,7 @@ jobs:
         with:
           script: |
             const execSync = require('child_process').execSync;
-            let apps = execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android --type=app`).toString().trim())
+            let apps = execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android --type=app`).toString().trim()
             core.setOutput("affectedApps", apps);
 #      - name: Generate affected matrix
 #        uses: mathiasvr/command-output@v1
