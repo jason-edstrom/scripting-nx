@@ -94,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: ${{ needs.setup.outputs.affected) }}
+        project: ["${{ needs.matrix.outputs.apps }}"]
     steps:
       - uses: actions/checkout@v3
         with:
