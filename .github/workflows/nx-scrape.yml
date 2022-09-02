@@ -36,7 +36,6 @@ jobs:
         id: scripting
         with:
           script: |
-
             const execSync = require('child_process').execSync;
             let include = [];
             let runner_task = {};
@@ -51,8 +50,10 @@ jobs:
               }
               include.push(runner_task);
             });
-            let json = JSON.stringify(include)
-            core.setOutput('affectedJSON', json);
+            let json={};
+            json["include"] = include;
+            let ready = JSON.stringify(json);
+            core.setOutput('affectedJSON', ready);
       - name: Print json
         run: echo "${{ steps.scripting.outputs.affectedJSON }}"
       - uses: actions/github-script@v6
@@ -91,7 +92,7 @@ jobs:
           echo $matrix | json2yaml
 
 
-  json_execute:
+  json_custom_execute:
     name: BUILD the json
     needs: [matrix]
     runs-on: ubuntu-latest
@@ -107,7 +108,7 @@ jobs:
           node-version: 16
           cache: 'yarn'
       - run: yarn install
-      - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
+      - run: nx run ${{ matrix.project }}:${{ matrix.target}}
 
   json_apps_execute:
     name: BUILD the json apps
