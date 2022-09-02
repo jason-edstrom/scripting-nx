@@ -36,8 +36,22 @@ jobs:
         id: scripting
         with:
           script: |
+
             const execSync = require('child_process').execSync;
-            let json = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android`).toString().trim())
+            let include = [];
+            let runner_task = {};
+            let nxJson = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android`).toString().trim())
+            nxJson.tasks.forEach(task => {
+              let runner_task = {
+                id: task.id,
+                project: task.target.project,
+                target: task.target.target,
+                command: task.command,
+                outputs: task.outputs
+              }
+              include.push(runner_task);
+            });
+            let json = JSON.stringify(include)
             core.setOutput('affectedJSON', json);
       - name: Print json
         run: echo "${{ steps.scripting.outputs.affectedJSON }}"
