@@ -1,0 +1,65 @@
+name: NX Scrape Matrix
+
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    name: Scrape NX for projects
+    outputs:
+      affected: ${{ steps.scripting.outputs.affectedJSON }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+      - run: yarn install
+
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v2
+        id: setSHAs
+      - uses: actions/github-script@v6
+        id: scripting
+        with:
+          script: |
+            const execSync = require('child_process').execSync;
+            let json = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android`).toString().trim())
+            core.setOutput('affectedJSON', json);
+      - name: Print json
+        run: echo "${{ steps.scripting.outputs.affectedJSON }}"
+#      - name: Generate affected matrix
+#        uses: mathiasvr/command-output@v1
+#        continue-on-error: true
+#        id: cmd
+#        with:
+#          run: npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android
+
+  execute:
+    name: BUILD the things
+    needs: [setup]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.affected) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+      - run: yarn install
+      - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
