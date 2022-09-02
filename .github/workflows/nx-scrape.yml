@@ -56,26 +56,7 @@ jobs:
             core.setOutput('affectedJSON', ready);
       - name: Print json
         run: echo "${{ steps.scripting.outputs.affectedJSON }}"
-      - uses: actions/github-script@v6
-        id: apps
-        with:
-          script: |
-            const execSync = require('child_process').execSync;
-            let apps = execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android --type=app`).toString().trim()
-            core.setOutput("affectedApps", apps);
-      - uses: actions/github-script@v6
-        id: array-apps
-        with:
-          script: |
-            const execSync = require('child_process').execSync;
-            let apps = execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android --select=tasks.target.project`).toString().trim()
-            core.setOutput("affectedAppsArray", apps);
-#      - name: Generate affected matrix
-#        uses: mathiasvr/command-output@v1
-#        continue-on-error: true
-#        id: cmd
-#        with:
-#          run: npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android
+
   check-matrix:
     runs-on: ubuntu-latest
     needs: matrix
@@ -93,7 +74,7 @@ jobs:
 
 
   json_custom_execute:
-    name: BUILD the json
+    name: Build ${matrix.project} App
     needs: [matrix]
     runs-on: ubuntu-latest
     strategy:
