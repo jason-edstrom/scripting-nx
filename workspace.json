@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "version": 2,
+  "projects": {
+    "affected-nx": "apps/affected-nx",
+    "affected-nx-e2e": "apps/affected-nx-e2e",
+    "nx-affected-nx-affected": "apps/nx-affected/nx-affected",
+    "nx-affected-nx-affected-e2e": "apps/nx-affected/nx-affected-e2e"
+  }
+}
