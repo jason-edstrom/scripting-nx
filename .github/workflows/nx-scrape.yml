@@ -17,6 +17,7 @@ jobs:
     name: Scrape NX for projects
     outputs:
       matrix: ${{ steps.scripting.outputs.affectedJSON }}
+      apps: ${{ steps.apps.outputs.affectedApps }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -39,6 +40,13 @@ jobs:
             core.setOutput('affectedJSON', json);
       - name: Print json
         run: echo "${{ steps.scripting.outputs.affectedJSON }}"
+      - uses: actions/github-script@v6
+        id: apps
+        with:
+          script: |
+            const execSync = require('child_process').execSync;
+            let apps = execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android --type=app`).toString().trim())
+            core.setOutput("affectedApps", apps);
 #      - name: Generate affected matrix
 #        uses: mathiasvr/command-output@v1
 #        continue-on-error: true
@@ -60,20 +68,40 @@ jobs:
           echo $matrix | jq .
           echo $matrix | json2yaml
 
-#  execute:
-#    name: BUILD the things
-#    needs: [matrix]
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix: ${{ fromJSON(needs.setup.outputs.affected) }}
-#    steps:
-#      - uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
-#      - uses: actions/setup-node@v3
-#        with:
-#          node-version: 16
-#          cache: 'yarn'
-#      - run: yarn install
-#      - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
+
+  json_execute:
+    name: BUILD the things
+    needs: [matrix]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+      - run: yarn install
+      - run: nx run ${{ tasks.*.project }}:${{ tasks.*.target}}
+
+  array_execute:
+    name: BUILD the apps
+    needs: [ matrix ]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ needs.setup.outputs.affected) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+      - run: yarn install
+      - run: nx run ${{ matrix.project }}:build-android
