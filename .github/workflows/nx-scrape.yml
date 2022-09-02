@@ -12,11 +12,11 @@ on:
 
 
 jobs:
-  setup:
+  matrix:
     runs-on: ubuntu-latest
     name: Scrape NX for projects
     outputs:
-      affected: ${{ steps.scripting.outputs.affectedJSON }}
+      matrix: ${{ steps.scripting.outputs.affectedJSON }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -45,21 +45,35 @@ jobs:
 #        id: cmd
 #        with:
 #          run: npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android
-
-  execute:
-    name: BUILD the things
-    needs: [setup]
+  check-matrix:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.setup.outputs.affected) }}
+    needs: matrix
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: 'yarn'
-      - run: yarn install
-      - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
+      - name: Install json2yaml
+        run: |
+          sudo npm install -g json2yaml
+
+      - name: Check matrix definition
+        run: |
+          matrix='${{ needs.matrix.outputs.matrix }}'
+          echo $matrix
+          echo $matrix | jq .
+          echo $matrix | json2yaml
+
+#  execute:
+#    name: BUILD the things
+#    needs: [matrix]
+#    runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false
+#      matrix: ${{ fromJSON(needs.setup.outputs.affected) }}
+#    steps:
+#      - uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#      - uses: actions/setup-node@v3
+#        with:
+#          node-version: 16
+#          cache: 'yarn'
+#      - run: yarn install
+#      - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
