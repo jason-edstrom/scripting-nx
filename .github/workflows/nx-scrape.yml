@@ -120,7 +120,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: ["${{ needs.matrix.outputs.array-apps }}"]
+        project: [${{ needs.matrix.outputs.array-apps }}]
     steps:
       - uses: actions/checkout@v3
         with:
