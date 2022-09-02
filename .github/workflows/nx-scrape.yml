@@ -18,6 +18,7 @@ jobs:
     outputs:
       matrix: ${{ steps.scripting.outputs.affectedJSON }}
       apps: ${{ steps.apps.outputs.affectedApps }}
+      array-apps: ${{ steps.array-apps.outputs.affectedAppsArray }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -47,6 +48,13 @@ jobs:
             const execSync = require('child_process').execSync;
             let apps = execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android --type=app`).toString().trim()
             core.setOutput("affectedApps", apps);
+      - uses: actions/github-script@v6
+        id: array-apps
+        with:
+          script: |
+            const execSync = require('child_process').execSync;
+            let apps = execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android --select=tasks.target.project`).toString().trim()
+            core.setOutput("affectedAppsArray", apps);
 #      - name: Generate affected matrix
 #        uses: mathiasvr/command-output@v1
 #        continue-on-error: true
@@ -87,6 +95,24 @@ jobs:
       - run: yarn install
       - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
 
+  json_apps_execute:
+    name: BUILD the things
+    needs: [ matrix ]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.matrix.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+      - run: yarn install
+      - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
+
   array_execute:
     name: BUILD the apps
     needs: [ matrix ]
@@ -94,7 +120,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [${{ needs.matrix.outputs.apps }}]
+        project: ["${{ needs.matrix.outputs.array-apps }}"]
     steps:
       - uses: actions/checkout@v3
         with:
