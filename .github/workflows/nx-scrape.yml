@@ -38,7 +38,8 @@ jobs:
           script: |
             const execSync = require('child_process').execSync;
             let json = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android`).toString().trim())
-            core.setOutput('affectedJSON', json);
+            let format = format(json,"\"", "\\\"");
+            core.setOutput('affectedJSON', format);
       - name: Print json
         run: echo "${{ steps.scripting.outputs.affectedJSON }}"
       - uses: actions/github-script@v6
