@@ -85,7 +85,7 @@ jobs:
           node-version: 16
           cache: 'yarn'
       - run: yarn install
-      - run: nx run ${{ tasks.*.project }}:${{ tasks.*.target}}
+      - run: nx run ${{ matrix.tasks.*.project }}:${{ matrix.tasks.*.target}}
 
   array_execute:
     name: BUILD the apps
