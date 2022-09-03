@@ -17,8 +17,6 @@ jobs:
     name: Scrape NX for projects
     outputs:
       matrix: ${{ steps.scripting.outputs.affectedJSON }}
-      apps: ${{ steps.apps.outputs.affectedApps }}
-      array-apps: ${{ steps.array-apps.outputs.affectedAppsArray }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -39,14 +37,21 @@ jobs:
             const execSync = require('child_process').execSync;
             let include = [];
             let runner_task = {};
-            let nxJson = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android`).toString().trim())
+            let nxJson = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android, build-ios`).toString().trim())
             nxJson.tasks.forEach(task => {
               let runner_task = {
                 id: task.id,
                 project: task.target.project,
                 target: task.target.target,
                 command: task.command,
-                outputs: task.outputs
+                outputs: task.outputs,
+                os: () => {
+                  if (contains(target,"build-ios")){
+                    return 'macos-latest';
+                    } else {
+                        return "ubuntu-latest"
+                    }
+                }
               }
               include.push(runner_task);
             });
@@ -74,9 +79,9 @@ jobs:
 
 
   json_custom_execute:
-    name: Build ${matrix.project} App
+    name: ${{ matrix.target }}
     needs: [matrix]
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.matrix.outputs.matrix) }}
