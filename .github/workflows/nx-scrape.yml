@@ -76,8 +76,8 @@ jobs:
           echo $matrix | json2yaml
 
 
-  build_android:
-    name: ${{ matrix.project }}
+  android:
+    name: Android (${{ matrix.project }})
     needs: [matrix]
     runs-on: ${{matrix.os}}
     strategy:
