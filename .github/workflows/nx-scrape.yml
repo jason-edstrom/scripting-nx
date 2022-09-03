@@ -46,7 +46,7 @@ jobs:
                 command: task.command,
                 outputs: task.outputs
               }
-                if (task.target.target.contains("build-ios")){
+                if (contains(runner_task.target,"ios")){
                   runner_task.os =  'macos-latest';
                 } else {
                   runner_task.os =  "ubuntu-latest";
