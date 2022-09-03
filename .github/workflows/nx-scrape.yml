@@ -44,15 +44,16 @@ jobs:
                 project: task.target.project,
                 target: task.target.target,
                 command: task.command,
-                outputs: task.outputs,
-                os: () => {
-                  if (contains(target,"build-ios")){
-                    return 'macos-latest';
-                    } else {
-                        return "ubuntu-latest"
-                    }
-                }
+                outputs: task.outputs
               }
+
+                if (contains(runner_task.target,"build-ios")){
+                  runner_tas.os =  'macos-latest';
+                } else {
+                  runner_task.os =  "ubuntu-latest";
+                }
+
+
               include.push(runner_task);
             });
             let json={};
