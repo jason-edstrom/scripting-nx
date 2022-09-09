@@ -8,7 +8,7 @@ inputs:
   targets:
     description: 'comma-delimited targets to run'
     required: false
-    default: 'build-ios'
+    default: 'build-android'
 #  args:
 #    description: 'space-delimited args to add to nx command execution'
 #    required: false

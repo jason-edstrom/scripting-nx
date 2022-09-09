@@ -96,7 +96,7 @@ jobs:
   build_android:
     name: ${{ matrix.project }} (android)
     needs: [matrix]
-    runs-on: ${{matrix.os}}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.matrix.outputs.matrix) }}
