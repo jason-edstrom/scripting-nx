@@ -1,0 +1,69 @@
+name: 'NX Affected React Native Matrix'
+branding:
+  icon: grid
+  color: white
+author: InstaCode
+description: "Calculates changes in NX workspace and outputs a JSON that can be used as GitHub's job matrix"
+inputs:
+  targets:
+    description: 'comma-delimited targets to run'
+    required: false
+    default: 'build-android'
+#  args:
+#    description: 'space-delimited args to add to nx command execution'
+#    required: false
+#  maxDistribution:
+#    description: "Maximum distribution of jobs per target"
+#    required: false
+#    default: '3'
+#  maxParallel:
+#    description: "Maximum distribution of jobs per target"
+#    deprecationMessage: "Deprecated. Use maxDistribution instead"
+#    required: false
+#    default: '3'
+#  workingDirectory:
+#    description: "Path to the Nx workspace, needed if not the repository root"
+#    required: false
+outputs:
+  matrix:
+    description: "The matrix that should be used in next job's matrix strategy"
+    value: ${{ steps.calculate.outputs.generatedMatrix }}
+#  apps:
+#    description: "A comma-delimited list of the affected apps"
+#    value: ${{ steps.calculate.outputs.apps }}
+#  libs:
+#    description: "A comma-delimited list of the affected libs (including non buildable libs)"
+#    value: ${{ steps.calculate.outputs.libs }}
+#  hasChanges:
+#    description: "Returns true when there are changes, can be used to skip next steps"
+#    value: ${{ steps.calculate.outputs.hasChanges }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Derive appropriate SHAs for base and head for `nx affected` commands
+      uses: nrwl/nx-set-shas@v2
+      id: setSHAs
+    - uses: actions/github-script@v6
+      id: calculate
+      with:
+        script: |
+          const execSync = require('child_process').execSync;
+          let include = [];
+          let nxJson = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=${{ inputs.targets }}`).toString().trim())
+          nxJson.tasks.forEach(task => {
+            let runner_task = {
+              id: task.id,
+              project: task.target.project,
+              target: task.target.target,
+              command: task.command,
+              outputs: task.outputs
+            }
+            include.push(runner_task);
+          });
+          let json={};
+          json["include"] = include;
+          let ready = JSON.stringify(json);
+          core.setOutput('generatedMatrix', ready);
+    - name: Print json
+      run: echo "${{ steps.calculate.outputs.generatedMatrix }}"
+      shell: bash

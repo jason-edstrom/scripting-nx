@@ -527,4 +527,6 @@ lint/tmp/
 # lint/reports/
 
 # Android Profiling
-
+apps/crew-manager/crew-manager-e2e/artifacts
+apps/bridge-e2e/artifacts
+apps/crew-manager-e2e/artifacts

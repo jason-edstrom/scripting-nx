@@ -2,6 +2,8 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
-    "affected-nx": "apps/affected-nx"
+    "affected-nx": "apps/affected-nx",
+    "bridge": "apps/bridge",
+    "crew-manager": "apps/crew-manager"
   }
 }
