@@ -27,7 +27,7 @@ inputs:
 outputs:
   matrix:
     description: "The matrix that should be used in next job's matrix strategy"
-    value: ${{ steps.calculate.outputs.matrix }}
+    value: ${{ steps.calculate.outputs.generatedMatrix }}
 #  apps:
 #    description: "A comma-delimited list of the affected apps"
 #    value: ${{ steps.calculate.outputs.apps }}
@@ -64,4 +64,6 @@ runs:
           let json={};
           json["include"] = include;
           let ready = JSON.stringify(json);
-          core.setOutput('matrix', ready);
+          core.setOutput('generatedMatrix', ready);
+    - name: Print json
+      run: echo "${{ steps.calculate.outputs.generatedMatrix }}"
