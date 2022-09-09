@@ -28,7 +28,7 @@ jobs:
       - run: yarn install
       - name: NX Distributed Affected
         id: generate-matrix
-        uses: .github/actions/nx-affected-matrix
+        uses: ./.github/actions/nx-affected-matrix
 #  matrix:
 #    runs-on: ubuntu-latest
 #    name: Scrape NX for projects
