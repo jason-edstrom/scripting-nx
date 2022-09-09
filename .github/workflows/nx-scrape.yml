@@ -14,9 +14,9 @@ on:
 jobs:
   matrix:
     runs-on: ubuntu-latest
-    name: Scrape NX for projects
+    name: Create Affected Matrix
     outputs:
-      matrix: ${{ steps.scripting.outputs.affectedJSON }}
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,39 +26,56 @@ jobs:
           node-version: 16
           cache: 'yarn'
       - run: yarn install
-
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v2
-        id: setSHAs
-      - uses: actions/github-script@v6
-        id: scripting
-        with:
-          script: |
-            const execSync = require('child_process').execSync;
-            let include = [];
-            //let runner_task = {};
-            let nxJson = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android`).toString().trim())
-            nxJson.tasks.forEach(task => {
-              let runner_task = {
-                id: task.id,
-                project: task.target.project,
-                target: task.target.target,
-                command: task.command,
-                outputs: task.outputs
-              }
-                if (runner_task.target.includes("ios")){
-                  runner_task.os =  'macos-latest';
-                } else {
-                  runner_task.os =  "ubuntu-latest";
-                }
-              include.push(runner_task);
-            });
-            let json={};
-            json["include"] = include;
-            let ready = JSON.stringify(json);
-            core.setOutput('affectedJSON', ready);
-      - name: Print json
-        run: echo "${{ steps.scripting.outputs.affectedJSON }}"
+      - name: NX Distributed Affected
+        id: generate-matrix
+        uses: .github/actions/nx-affected-matrix
+#  matrix:
+#    runs-on: ubuntu-latest
+#    name: Scrape NX for projects
+#    outputs:
+#      matrix: ${{ steps.scripting.outputs.affectedJSON }}
+#    steps:
+#      - uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#      - uses: actions/setup-node@v3
+#        with:
+#          node-version: 16
+#          cache: 'yarn'
+#      - run: yarn install
+#
+#      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+#        uses: nrwl/nx-set-shas@v2
+#        id: setSHAs
+#      - uses: actions/github-script@v6
+#        id: scripting
+#        with:
+#          script: |
+#            const execSync = require('child_process').execSync;
+#            let include = [];
+#            //let runner_task = {};
+#            let nxJson = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=build-android`).toString().trim())
+#            nxJson.tasks.forEach(task => {
+#              let runner_task = {
+#                id: task.id,
+#                project: task.target.project,
+#                target: task.target.target,
+#                command: task.command,
+#                outputs: task.outputs
+#              }
+#                if (runner_task.target.includes("ios")){
+#                  runner_task.os =  'macos-latest';
+#                } else {
+#                  runner_task.os =  "ubuntu-latest";
+#                }
+#              include.push(runner_task);
+#            });
+#            let json={};
+#            json["include"] = include;
+#            let ready = JSON.stringify(json);
+#            core.setOutput('affectedJSON', ready);
+#      - name: Print json
+#        run: echo "${{ steps.scripting.outputs.affectedJSON }}"
 
   check-matrix:
     runs-on: ubuntu-latest
