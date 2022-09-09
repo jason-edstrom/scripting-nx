@@ -67,3 +67,4 @@ runs:
           core.setOutput('generatedMatrix', ready);
     - name: Print json
       run: echo "${{ steps.calculate.outputs.generatedMatrix }}"
+      shell: bash
