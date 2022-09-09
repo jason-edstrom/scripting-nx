@@ -48,11 +48,9 @@ runs:
       with:
         script: |
           let targets = core.getInput('targets')
-          core.getInput('targets')
           const execSync = require('child_process').execSync;
           let include = [];
-          //let runner_task = {};
-          let nxJson = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=${{targets}}`).toString().trim())
+          let nxJson = JSON.parse(execSync(`npx nx print-affected --base=${{ steps.setSHAs.outputs.base }} --head=${{ steps.setSHAs.outputs.head }} --target=${targets}`).toString().trim())
           nxJson.tasks.forEach(task => {
             let runner_task = {
               id: task.id,
